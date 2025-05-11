@@ -200,12 +200,14 @@ def test_favourites(favourites=None, devices=None, now=None, timeout=2, verbose=
         mid = match_in_devices(ip, mac, devices, verbose=verbose>1)
 
         if mid == 0:
-            if verbose:
-                print(f"X {name} ({parse_unix(lastonline)}) offline")
             result = send_ARP(ip, timeout=timeout, verbose=verbose>1)
             if result:
+                if verbose:
+                    print(f"Device was found on second try:")
                 mid=4
             else:
+                if verbose:
+                    print(f"X {name} ({parse_unix(lastonline)}) offline")
                 new_favourites.append(fav)
         if mid == 1:
             newmac = match_ip_in_devices(ip, devices)[1]
