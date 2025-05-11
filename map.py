@@ -191,31 +191,35 @@ def test_favourites(favourites=None, devices=None, now=None, timeout=2, verbose=
     online = []
     new_favourites = []
     print()
-    for f in favourites: # (name, (ip, mac), lastonline)
+    for fav in favourites: # (name, (ip, mac), lastonline)
         print()
-        name = f[0]
-        ip = f[1][0]
-        mac = f[1][1]
-        lastonline = f[2] if len(f) > 2 else 0
-        m = match_in_devices(ip, mac, devices, verbose=verbose>1)
+        name = fav[0]
+        ip = fav[1][0]
+        mac = fav[1][1]
+        lastonline = fav[2] if len(fav) > 2 else 0
+        mid = match_in_devices(ip, mac, devices, verbose=verbose>1)
 
-        if m == 0:
+        if mid == 0:
             if verbose:
                 print(f"X {name} ({parse_unix(lastonline)}) offline")
-            new_favourites.append(f)
-        elif m == 1:
+            result = send_ARP(ip, timeout=timeout, verbose=verbose>1)
+            if result:
+                mid=4
+            else:
+                new_favourites.append(fav)
+        if mid == 1:
             newmac = match_ip_in_devices(ip, devices)[1]
             if verbose:
                 print(f"X Device {name} (last: {parse_unix(lastonline)}) not online or MAC changed, IP {ip} has MAC {newmac}")
                 print("Favourites entry won't be updated")
-            new_favourites.append(f)
-        elif m == 2:
+            new_favourites.append(fav)
+        elif mid == 2:
             newip = match_mac_in_devices(mac, devices)[0]
             if verbose:
                 print(f"! Device {name} (last: {parse_unix(lastonline)}) IP changed, MAC {mac} has IP {newip}")
             online.append((name, (newip, mac), lastonline))
             new_favourites.append((name, (newip, mac), now))
-        elif m == 3:
+        elif mid == 3:
             newip = match_mac_in_devices(mac, devices)[0]
             newmac = match_ip_in_devices(ip, devices)[1]
             if verbose:
@@ -224,13 +228,13 @@ def test_favourites(favourites=None, devices=None, now=None, timeout=2, verbose=
             online.append((name, (newip, mac), lastonline))
             new_favourites.append((name, (newip, mac), now))
             new_favourites.append((name+'_CONFLICT_OLDIP_NEWMAC', (ip, newmac), now))
-        elif m == 4:
+        elif mid == 4:
             if verbose:
                 print(f"! {name} ({parse_unix(lastonline)}) online\n\t(IP: {ip}, MAC {mac})")
-            online.append(f)
+            online.append(fav)
             new_favourites.append((name, (ip, mac), now))
-        else:
-            new_favourites.append(f)
+        #else:
+        #    new_favourites.append(fav)
 
     save(_MAIN_LIST, new_favourites)
     return online
