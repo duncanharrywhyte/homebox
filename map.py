@@ -70,7 +70,13 @@ def find_all_devices(iprange=_HOME_RANGE, verbose=__DEFAULT_VERBOSE):
     if verbose:
         print(f'Found {len(result)} devices in the range {iprange}')
 
+
     devices = [(d.psrc,d.hwsrc) for c, d in result]
+
+    if verbose > 1:
+        for ip, mac in sorted(devices,key=lambda x: int(x[0].split('.')[-1])):
+            print(f"{mac} {ip}")
+
     return devices
 
 def match_ip_in_devices(ip, devices):
