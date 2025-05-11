@@ -18,7 +18,7 @@ if __DEFAULT_VERBOSE:
     print("Module has been hard-coded to be verbose. You can change this by setting __DEFAULT_VERBOSE to 0.")
     print(f"Call help({__name__}) for all functions.")
 
-def send_ARP(ip, verbose=__DEFAULT_VERBOSE):
+def send_ARP(ip, timeout=2, verbose=__DEFAULT_VERBOSE):
     if verbose:
         print(f"Sending ARP request to {ip}")
     arp = ARP(pdst=ip)
@@ -26,7 +26,7 @@ def send_ARP(ip, verbose=__DEFAULT_VERBOSE):
     packet = ether / arp
 
     # Send the packet and receive the response
-    result = srp(packet, timeout=2, verbose=verbose)[0]
+    result = srp(packet, timeout=timeout, verbose=verbose)[0]
 
     # Check if we received a response
     if verbose:
@@ -59,12 +59,12 @@ def test_all_gateways(gateways=(_PREFERRED_GATEWAY, _BACKUP_GATEWAY), verbose=__
             return gateway
     print(f"None of the gateways {gateways} are reachable.")
 
-def find_all_devices(iprange=_HOME_RANGE, verbose=__DEFAULT_VERBOSE):
+def find_all_devices(iprange=_HOME_RANGE, timeout=2, verbose=__DEFAULT_VERBOSE):
     if verbose:
         print(f"Scanning IP range: {iprange}")
 
     # Send ARP request to the entire IP range
-    result = send_ARP(iprange, verbose)
+    result = send_ARP(iprange, timeout=timeout, verbose=verbose)
 
     # Check if we received a response
     if verbose:
@@ -177,13 +177,13 @@ def load_favourites(key=_MAIN_LIST, file=_DEFAULT_FILE, verbose=__DEFAULT_VERBOS
                 print(f"{name} (last: {parse_unix(lastonline)}) is at (IP: {ip[0]}, MAC: {ip[1]})")
         return favourites
 
-def test_favourites(favourites=None, devices=None, now=None, verbose=__DEFAULT_VERBOSE):
+def test_favourites(favourites=None, devices=None, now=None, timeout=2, verbose=__DEFAULT_VERBOSE):
     if now is None:
         now = time.time()
     if favourites is None:
         favourites = load_favourites(key=_MAIN_LIST, file=_DEFAULT_FILE, verbose=verbose>1)
     if devices is None:
-        devices = find_all_devices(verbose=verbose>1)
+        devices = find_all_devices(timeout=timeout, verbose=verbose>1)
 
     if verbose:
         print(f"Testing favourites: {favourites}")
