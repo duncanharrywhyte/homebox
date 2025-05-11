@@ -244,9 +244,10 @@ def save_favourite(name, ip, mac=None, lastonline=None, key=_MAIN_LIST, file=_DE
             print(f"MAC address not given, searching for it...")
         if devices is None:
             if verbose:
-                print("No devices given, scanning...")
-            devices = find_all_devices(verbose=verbose)
-        mac = match_ip_in_devices(ip, devices)[1]
+                print("No devices given, ARPing MAC...")
+            mac = send_ARP(ip, verbose=verbose)[0][1].hwsrc
+        else:
+            mac = match_ip_in_devices(ip, devices)[1]
         if mac is None:
             print(f"MAC address not found for IP {ip}")
             return False
