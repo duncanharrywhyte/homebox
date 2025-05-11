@@ -41,7 +41,7 @@ def test_gateway(gateway=_PREFERRED_GATEWAY, verbose=__DEFAULT_VERBOSE):
         print(f"Testing gateway: {gateway}")
 
     # Send ARP request to the gateway
-    result = send_ARP(gateway, verbose)
+    result = send_ARP(gateway, timeout=5, verbose=verbose)
 
     # Check if we received a response
     if verbose:
